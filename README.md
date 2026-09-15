@@ -140,7 +140,7 @@ The module supports full and partial refunds through WHMCS:
 - A full refund omits `items` and refunds the remaining refundable balance.
 - Dodo refund statuses other than `succeeded` are returned to WHMCS as an error with a warning **not to retry until the Dodo refund status has been checked**, preventing accidental duplicate refund attempts.
 
-## Upgrade from 1.0.1
+## Upgrade
 
 Version 1.0.0 keeps the existing Test/Live API key, webhook-secret, product-map and button-text setting names. It adds one required field: **WHMCS Instance ID**.
 
