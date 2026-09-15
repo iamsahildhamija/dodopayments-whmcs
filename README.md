@@ -16,7 +16,7 @@ This module does **not** create Dodo subscriptions and does not perform automati
 
 If true automatic recurring charging is required, that is a separate tokenized/subscription integration and is outside this module's design.
 
-## Files to upload
+## Upload
 
 Upload the contents of `modules/` into the matching WHMCS `modules/` directory:
 
@@ -112,7 +112,7 @@ Create/pay a real WHMCS test invoice and confirm all of the following:
 
 Switch the Dodo dashboard to **Live Mode** and repeat the setup with separate live products, API key, and webhook endpoint secret. Put those values into the module's Live fields, then change **Environment** to `Live` only after test checkout/webhook validation is complete.
 
-## Product map rules
+## Rules
 
 - Syntax: one `CURRENCY=PRODUCT_ID` per line.
 - Currency must be an ISO-style 3-letter code.
@@ -131,7 +131,7 @@ Switch the Dodo dashboard to **Live Mode** and repeat the setup with separate li
 - API keys and webhook secrets are never placed in browser HTML.
 - cURL SSL peer and hostname verification stay enabled.
 
-## Refund behavior
+## Refund
 
 The module supports full and partial refunds through WHMCS:
 
@@ -155,6 +155,6 @@ Notable changes:
 - Improved API error handling and logging.
 - Updated refund behavior against the current Dodo line-item/refund API shape.
 
-## Operational note
+## Note
 
 Dodo is the Merchant of Record for Dodo transactions and can generate its own tax/receipt documents. WHMCS also maintains its own invoice. Configure your accounting/tax workflow so customers and bookkeeping staff understand which document is the commercial/tax record in your jurisdiction.
