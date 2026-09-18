@@ -1,10 +1,10 @@
 # Dodo Payments for WHMCS 8.x / 9.x
 
-Version **1.0.0** — generic third-party gateway module using Dodo Payments Checkout Sessions and signed webhooks.
+This is generic third-party gateway module using Dodo Payments Checkout Sessions and signed webhooks.
 
 ## Architecture
 
-This is an **invoice-driven** gateway. WHMCS remains the system that owns products, billing cycles, renewals, invoice totals, coupons, taxes, and service provisioning. Dodo Payments is used to collect the **exact outstanding WHMCS invoice amount**.
+It is an **invoice-driven** gateway. WHMCS remains the system that owns products, billing cycles, renewals, invoice totals, coupons, taxes, and service provisioning. Dodo Payments is used to collect the **exact outstanding WHMCS invoice amount**.
 
 For each WHMCS invoice currency, create **one reusable Dodo Single Payment product** with **Pay What You Want** enabled. You do **not** create a Dodo product for every WHMCS product/service.
 
