@@ -1,58 +1,86 @@
 # Dodo Payments for WHMCS 8.x / 9.x
 
-This is generic third-party gateway module using Dodo Payments Checkout Sessions and signed webhooks.
+This package is a generic third-party WHMCS gateway module that uses Dodo Payments Checkout Sessions and signed webhooks.
 
 ## Architecture
 
-It is an **invoice-driven** gateway. WHMCS remains the system that owns products, billing cycles, renewals, invoice totals, coupons, taxes, and service provisioning. Dodo Payments is used to collect the **exact outstanding WHMCS invoice amount**.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#architecture)
 
-For each WHMCS invoice currency, create **one reusable Dodo Single Payment product** with **Pay What You Want** enabled. You do **not** create a Dodo product for every WHMCS product/service.
+This is an **invoice-driven** gateway. WHMCS remains responsible for products, billing cycles, renewals, invoice totals, coupons, taxes, and service provisioning. Dodo Payments is used only to collect the **exact outstanding WHMCS invoice amount**.
 
-This means a WHMCS installation with 100 products but 4 currencies needs 4 Dodo PWYW products, not 100.
+For each WHMCS invoice currency, create **one reusable Dodo Single Payment product** with **Pay What You Want** enabled.
+
+You do **not** need to create a separate Dodo product for every WHMCS product or service.
+
+For example, a WHMCS installation with 100 products and 4 supported currencies requires only 4 Dodo PWYW products.
 
 ### Recurring WHMCS services
 
-This module does **not** create Dodo subscriptions and does not perform automatic card-on-file rebilling. For a WHMCS product with recurring billing, WHMCS creates the renewal invoice on schedule and the customer pays that new invoice through Dodo.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#recurring-whmcs-services)
 
-If true automatic recurring charging is required, that is a separate tokenized/subscription integration and is outside this module's design.
+This module does **not** create Dodo subscriptions and does not perform automatic card-on-file rebilling.
 
-## Upload
+For recurring WHMCS products or services, WHMCS generates the renewal invoice according to the configured billing cycle. The customer then pays that invoice through Dodo Payments in the same way as any other WHMCS invoice.
 
-Upload the contents of `modules/` into the matching WHMCS `modules/` directory:
+If true automatic recurring charging is required, that requires a separate tokenized/subscription integration and is outside the design of this module.
 
-- `modules/gateways/dodopay.php`
-- `modules/gateways/dodopay/lib.php`
-- `modules/gateways/callback/dodopay.php`
+## Installation
+
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#installation)
+
+Upload the contents of the included `modules/` directory into the matching WHMCS `modules/` directory while preserving the paths:
+
+* `modules/gateways/dodopay.php`
+* `modules/gateways/dodopay/lib.php`
+* `modules/gateways/callback/dodopay.php`
 
 No Composer package or vendor directory is required.
 
 ## Required Dodo product settings
 
-Create one product per currency in **Test mode** and again in **Live mode**. Each mapped product must have:
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#required-dodo-product-settings)
 
-- Pricing Type: **Single Payment**
-- Currency: exactly the same 3-letter currency as the WHMCS invoice
-- **Pay What You Want: ON**
-- Minimum price: at or below the smallest invoice you intend to collect in that currency
-- Maximum price: optional; if set, it must be high enough for your largest invoice
-- **Tax Inclusive Pricing: ON**
-- **Purchasing Power Parity / adaptive pricing: OFF**
-- Do not depend on Dodo discount codes to alter a WHMCS invoice payment
-- Choose the **correct Dodo tax category** for the offering (`digital_products`, `saas`, `e_book`, or `edtech`). The module intentionally does not guess or hardcode a tax category. If one WHMCS installation mixes sales that Dodo would classify into different tax categories, confirm the appropriate architecture with Dodo/tax counsel before production; one proxy product per currency assumes the chosen category correctly represents the invoice being collected.
+Create one Dodo product per WHMCS invoice currency in **Test Mode** and repeat the same setup separately in **Live Mode**.
 
-The gateway sends the exact WHMCS invoice amount in the Dodo `product_cart.amount` field. It also disables currency selection, discount-code entry, and addon editing for the checkout session.
+Each mapped product must use the following settings:
+
+* Pricing Type: **Single Payment**
+* Currency: exactly the same 3-letter currency code as the WHMCS invoice
+* **Pay What You Want: ON**
+* Minimum price: at or below the smallest invoice you intend to collect in that currency
+* Maximum price: optional; if configured, it must be high enough for the largest invoice you intend to collect
+* **Tax Inclusive Pricing: ON**
+* **Purchasing Power Parity / adaptive pricing: OFF**
+* Do not depend on Dodo discount codes to modify the WHMCS invoice amount
+* Select the **correct Dodo tax category** for the offering, such as `digital_products`, `saas`, `e_book`, or `edtech`
+
+The module intentionally does not guess or hardcode a Dodo tax category.
+
+If one WHMCS installation contains products that Dodo would classify under different tax categories, confirm the appropriate production architecture with Dodo and/or your tax adviser. The one-proxy-product-per-currency design assumes that the selected Dodo tax category correctly represents the invoice being collected.
+
+The module sends the exact WHMCS invoice amount through Dodo's `product_cart.amount` field.
+
+It also disables currency selection, discount-code entry, and addon editing for the Checkout Session.
 
 ## Dodo Dashboard setup
 
-### 1. Test mode first
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#dodo-dashboard-setup)
 
-Enable Dodo **Test Mode** in the dashboard.
+### 1. Enable Test Mode
+
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#1-enable-test-mode)
+
+Enable **Test Mode** in the Dodo Payments dashboard before configuring the live environment.
 
 ### 2. Create PWYW products
 
-Under **Products**, create one product per WHMCS currency using the settings above. Note each product ID (`pdt_...`).
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#2-create-pwyw-products)
 
-Example map format:
+Under **Products**, create one product for each WHMCS invoice currency using the settings described above.
+
+Note each Dodo product ID in the `pdt_...` format.
+
+Example product map:
 
 ```text
 USD=pdt_example_usd
@@ -62,15 +90,25 @@ GBP=pdt_example_gbp
 
 ### 3. Create a write-enabled API key
 
-Go to **Developer > API Keys > Add API Key**. The module must create Checkout Sessions and refunds, so the API key needs **write access**.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#3-create-a-write-enabled-api-key)
+
+Go to:
+
+**Developer > API Keys > Add API Key**
+
+The module creates Checkout Sessions and can process refunds, so the API key requires **write access**.
 
 Copy the Test API key into the module's **Test API Key** field.
 
 ### 4. Create the webhook
 
-Go to **Developer > Webhooks > Add Webhook**.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#4-create-the-webhook)
 
-Endpoint URL:
+Go to:
+
+**Developer > Webhooks > Add Webhook**
+
+Use the following endpoint URL:
 
 ```text
 https://YOUR-WHMCS-DOMAIN/modules/gateways/callback/dodopay.php
@@ -82,79 +120,145 @@ Subscribe to:
 payment.succeeded
 ```
 
-Copy that endpoint's **Secret Key** into the module's **Test Webhook Secret** field.
+Copy the webhook endpoint's **Secret Key** into the module's **Test Webhook Secret** field.
 
 ### 5. Configure WHMCS
 
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#5-configure-whmcs)
+
 In WHMCS admin, activate **Dodo Payments** under Payment Gateways and configure:
 
-- Environment: `Test`
-- WHMCS Instance ID: a unique 8-64 character identifier for this installation, e.g. `whmcs_a8f14e45fceea167`
-- Test API Key
-- Test Webhook Secret
-- Test Product Map
+* Environment: `Test`
+* WHMCS Instance ID
+* Test API Key
+* Test Webhook Secret
+* Test Product Map
 
-The **WHMCS Instance ID must be different on every WHMCS website**, especially when several sites share one Dodo business/account. It is not a secret; it is a routing identifier carried in signed payment metadata.
+The **WHMCS Instance ID** must be a unique 8-64 character identifier for the WHMCS installation.
+
+Example:
+
+```text
+whmcs_a8f14e45fceea167
+```
+
+The WHMCS Instance ID must be different for every WHMCS website, especially when multiple WHMCS installations use the same Dodo business/account.
+
+The Instance ID is not a secret. It is a routing identifier included in signed payment metadata so that callbacks can be safely matched to the correct WHMCS installation.
 
 ### 6. Test end-to-end
 
-Create/pay a real WHMCS test invoice and confirm all of the following:
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#6-test-end-to-end)
 
-1. The Dodo checkout amount and currency exactly match the WHMCS invoice.
-2. The checkout succeeds in Dodo Test Mode.
-3. Dodo delivers `payment.succeeded` to the callback URL with HTTP 200.
-4. The WHMCS invoice becomes Paid.
-5. The WHMCS transaction ID is the Dodo `payment_id`.
-6. A second/retried webhook does not create a duplicate payment.
-7. Test a partial refund and a full refund from WHMCS if you intend to use refunds.
+Create and pay a real WHMCS test invoice.
 
-### 7. Repeat in Live mode
+Confirm all of the following:
 
-Switch the Dodo dashboard to **Live Mode** and repeat the setup with separate live products, API key, and webhook endpoint secret. Put those values into the module's Live fields, then change **Environment** to `Live` only after test checkout/webhook validation is complete.
+1. The Dodo checkout amount exactly matches the WHMCS invoice amount.
+2. The Dodo checkout currency exactly matches the WHMCS invoice currency.
+3. The checkout completes successfully in Dodo Test Mode.
+4. Dodo sends `payment.succeeded` to the callback URL and receives HTTP 200.
+5. The WHMCS invoice becomes Paid.
+6. The WHMCS transaction ID matches the Dodo `payment_id`.
+7. A duplicate or retried webhook does not create a second payment.
+8. If refunds will be used, test both a partial refund and a full refund from WHMCS.
 
-## Rules
+### 7. Repeat in Live Mode
 
-- Syntax: one `CURRENCY=PRODUCT_ID` per line.
-- Currency must be an ISO-style 3-letter code.
-- Blank lines are ignored.
-- Lines beginning with `#` or `;` are ignored.
-- The module intentionally has no website/company/product-catalog hardcoding and no four-currency allow-list.
-- The Dodo product itself is validated before checkout: one-time, PWYW, tax-inclusive, PPP/adaptive-pricing off, matching currency, and minimum price not above the invoice amount.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#7-repeat-in-live-mode)
+
+Switch the Dodo Payments dashboard to **Live Mode** and repeat the configuration using separate:
+
+* Live products
+* Live API key
+* Live webhook endpoint secret
+* Live product map
+
+Enter these values into the corresponding Live fields in WHMCS.
+
+Change **Environment** to `Live` only after the Test Mode checkout and webhook flow has been validated successfully.
+
+## Product map rules
+
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#product-map-rules)
+
+The product map follows these rules:
+
+* Use one `CURRENCY=PRODUCT_ID` entry per line.
+* Currency must use a 3-letter ISO-style currency code.
+* Blank lines are ignored.
+* Lines beginning with `#` or `;` are ignored.
+* The module contains no website, company, or product-catalog hardcoding.
+* The module contains no fixed USD/INR/GBP/EUR allow-list.
+
+Before creating a Checkout Session, the mapped Dodo product is validated to confirm that it is:
+
+* A one-time product
+* PWYW-enabled
+* Tax-inclusive
+* Configured with PPP/adaptive pricing disabled
+* Using the same currency as the WHMCS invoice
+* Configured with a minimum price that does not exceed the WHMCS invoice amount
 
 ## Security and payment integrity
 
-- Checkout metadata includes the WHMCS gateway name, installation ID, invoice ID, currency, and exact minor-unit amount.
-- Webhook signatures are validated using the Standard Webhooks HMAC-SHA256 format and a 5-minute timestamp tolerance.
-- A signed webhook for another WHMCS installation is acknowledged and ignored.
-- `payment.succeeded` must match the original checkout currency and exact minor-unit amount before WHMCS is credited.
-- Dodo `payment_id` is used as the WHMCS transaction ID, so WHMCS rejects duplicate callbacks.
-- API keys and webhook secrets are never placed in browser HTML.
-- cURL SSL peer and hostname verification stay enabled.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#security-and-payment-integrity)
 
-## Refund
+The module includes several checks to protect invoice and payment integrity:
 
-The module supports full and partial refunds through WHMCS:
+* Checkout metadata includes the WHMCS gateway name, WHMCS Instance ID, invoice ID, currency, and exact minor-unit amount.
+* Webhook signatures are validated using the Standard Webhooks HMAC-SHA256 format.
+* Webhook timestamps use a 5-minute tolerance.
+* A valid signed webhook intended for another WHMCS installation is acknowledged and ignored.
+* A `payment.succeeded` callback must match the original checkout currency.
+* A `payment.succeeded` callback must match the exact original minor-unit amount before WHMCS is credited.
+* The Dodo `payment_id` is used as the WHMCS transaction ID so duplicate callbacks are rejected by WHMCS.
+* API keys and webhook secrets are never exposed in browser HTML.
+* cURL SSL peer and hostname verification remain enabled.
 
-- It retrieves `/payments/{payment_id}/line-items` first.
-- A partial refund sends Dodo's original `items_id` as `item_id`, amount in minor units, and `tax_inclusive: true`.
-- A full refund omits `items` and refunds the remaining refundable balance.
-- Dodo refund statuses other than `succeeded` are returned to WHMCS as an error with a warning **not to retry until the Dodo refund status has been checked**, preventing accidental duplicate refund attempts.
+## Refunds
 
-## Upgrade
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#refunds)
 
-Version 1.0.0 keeps the existing Test/Live API key, webhook-secret, product-map and button-text setting names. It adds one required field: **WHMCS Instance ID**.
+The module supports full and partial refunds through WHMCS.
 
-Notable changes:
+For refunds:
 
-- Removed the old USD/INR/GBP/EUR-only dynamic-currency restriction.
-- Added safe multi-WHMCS webhook routing via Instance ID.
-- Generic currency mapping now drives support.
-- Valid customer object is sent only when WHMCS supplies a valid email.
-- Existing-customer duplication is reduced (`always_create_new_customer=false`).
-- Saved payment methods are not exposed by this invoice checkout.
-- Improved API error handling and logging.
-- Updated refund behavior against the current Dodo line-item/refund API shape.
+* The module first retrieves `/payments/{payment_id}/line-items`.
+* A partial refund sends Dodo's original `items_id` as `item_id`.
+* Partial refund amounts are sent in minor units with `tax_inclusive: true`.
+* A full refund omits `items` and refunds the remaining refundable balance.
+* Dodo refund statuses other than `succeeded` are returned to WHMCS as an error.
+
+When a refund does not return `succeeded`, the module also warns **not to retry the refund until the current Dodo refund status has been checked**. This helps prevent accidental duplicate refund attempts.
+
+## Changelog
+
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#changelog)
+
+Version `1.0.0` keeps the existing Test/Live API key, webhook-secret, product-map, and button-text setting names.
+
+It adds one required field:
+
+* **WHMCS Instance ID**
+
+Other notable changes include:
+
+* Removed the previous USD/INR/GBP/EUR-only dynamic-currency restriction.
+* Added safe multi-WHMCS webhook routing through the WHMCS Instance ID.
+* Added generic currency mapping.
+* Sends a customer object only when WHMCS provides a valid customer email address.
+* Reduces unnecessary Dodo customer duplication using `always_create_new_customer=false`.
+* Does not expose saved payment methods through this invoice checkout flow.
+* Improved API error handling and gateway logging.
+* Updated refund handling for the current Dodo line-item and refund API structure.
 
 ## Note
 
-Dodo is the Merchant of Record for Dodo transactions and can generate its own tax/receipt documents. WHMCS also maintains its own invoice. Configure your accounting/tax workflow so customers and bookkeeping staff understand which document is the commercial/tax record in your jurisdiction.
+[svg](https://github.com/iamsahildhamija/dodopayments-whmcs#note)
+
+Dodo Payments acts as the Merchant of Record for Dodo transactions and may generate its own tax, receipt, or commercial documents.
+
+WHMCS also maintains its own invoice record.
+
+Configure your accounting and tax workflow so that customers and bookkeeping staff clearly understand which document should be treated as the commercial or tax record in the applicable jurisdiction.
