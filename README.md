@@ -1,4 +1,4 @@
-# Dodo Payments for WHMCS 8.x / 9.x
+# Dodo Payments Module for WHMCS 8.x / 9.x
 
 This package is a generic third-party WHMCS gateway module that uses Dodo Payments Checkout Sessions and signed webhooks.
 
