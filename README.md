@@ -12,7 +12,7 @@ You do **not** need to create a separate Dodo product for every WHMCS product or
 
 For example, a WHMCS installation with 100 products and 4 supported currencies requires only 4 Dodo PWYW products.
 
-### Recurring WHMCS services
+### Recurring
 
 This module does **not** create Dodo subscriptions and does not perform automatic card-on-file rebilling.
 
@@ -30,7 +30,7 @@ Upload the contents of the included `modules/` directory into the matching WHMCS
 
 No Composer package or vendor directory is required.
 
-## Required Dodo product settings
+## Required
 
 Create one Dodo product per WHMCS invoice currency in **Test Mode** and repeat the same setup separately in **Live Mode**.
 
@@ -54,7 +54,7 @@ The module sends the exact WHMCS invoice amount through Dodo's `product_cart.amo
 
 It also disables currency selection, discount-code entry, and addon editing for the Checkout Session.
 
-## Dodo Dashboard setup
+## Setup
 
 ### 1. Enable Test Mode
 
@@ -154,7 +154,7 @@ Enter these values into the corresponding Live fields in WHMCS.
 
 Change **Environment** to `Live` only after the Test Mode checkout and webhook flow has been validated successfully.
 
-## Product map rules
+## Mapping
 
 The product map follows these rules:
 
@@ -174,7 +174,7 @@ Before creating a Checkout Session, the mapped Dodo product is validated to conf
 * Using the same currency as the WHMCS invoice
 * Configured with a minimum price that does not exceed the WHMCS invoice amount
 
-## Security and payment integrity
+## Security
 
 The module includes several checks to protect invoice and payment integrity:
 
